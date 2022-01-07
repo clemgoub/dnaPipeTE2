@@ -15,7 +15,7 @@ process sra_dump {
     val sra
 
   output:
-    tuple val(sra), path("*.fastq"), emit: fastq
+    tuple val(sra), path("*.fastq.gz"), emit: fastq
 
   script:
 """
