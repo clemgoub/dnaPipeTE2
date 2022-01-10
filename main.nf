@@ -5,7 +5,6 @@ params.coverage = 0.1;
 params.size = "170mb";
 params.min_glue = 1;
 params.min_contig_length = 200;
-params.seed = 1234; //Math.round(Math.random() * 1e9);
 params.sample = "3";
 
 println "==========================================================================================="
@@ -26,12 +25,13 @@ include {
   sampling 
 } from './src/sampling.nf' addParams(
   coverage: params.coverage,
-  genome_size: params.size,
-  seed: params.seed
+  genome_size: params.size
 );
 
 include {
-  assembly 
+  assembly;
+  merge;
+  cluster
 } from './src/assembly.nf' addParams(
   min_glue: params.min_glue,
   min_contig_length: params.min_contig_length
@@ -42,6 +42,10 @@ def str_to_int_list(str) {
   return (1..Integer.parseInt(str)).toList();
 }
 
+def SRA_to_sample_name(str, sample) {
+  return(str + "_sample_" + sample);
+}
+
 channel.from( params.sra.split(" ") ).set{ sra };
 channel.fromList( str_to_int_list(params.sample) ).set{ samples };
 
@@ -50,7 +54,9 @@ workflow {
   sampling(
     samples
       .combine(sra_dump.out.fastq)
-      .map{ it -> it[1..2] }
+      .map{ it -> [it[1], SRA_to_sample_name(it[1], it[0]), it[2]] }
   )
   assembly(sampling.out.fastq)
+  merge(assembly.out.folder.groupTuple())
+  cluster(sampling.out.fastq.first(), merge.out.folder)
 };
