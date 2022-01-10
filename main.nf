@@ -8,12 +8,12 @@ params.min_contig_length = 200;
 params.sample = "3";
 
 println "==========================================================================================="
-println "SRA number:                  " + params.sra;
-println "genome size:                 " + params.size;
-println "genome coverage:             " + params.coverage;
-println "sample number:               " + params.sample;
-println "trinity min glue:            " + params.min_glue;
-println "trinity min contig length:   " + params.min_contig_length;
+println "SRA number (--sra):                                " + params.sra;
+println "genome size (--size):                              " + params.size;
+println "genome coverage (--coverage):                      " + params.coverage;
+println "sample number (--sample):                          " + params.sample;
+println "trinity min glue (--min_glue):                     " + params.min_glue;
+println "trinity min contig length (--min_contig_length):   " + params.min_contig_length;
 println "==========================================================================================="
 
 /* ========================= modules import =================================*/
@@ -31,8 +31,15 @@ include {
 include {
   assembly;
   merge;
-  cluster
+  final_assembly
 } from './src/assembly.nf' addParams(
+  min_glue: params.min_glue,
+  min_contig_length: params.min_contig_length
+);
+
+include {
+  clustering
+} from './src/clustering.nf' addParams(
   min_glue: params.min_glue,
   min_contig_length: params.min_contig_length
 );
@@ -58,5 +65,6 @@ workflow {
   )
   assembly(sampling.out.fastq)
   merge(assembly.out.folder.groupTuple())
-  cluster(sra_dump.out.fastq, merge.out.folder)
+  final_assembly(sra_dump.out.fastq, merge.out.folder)
+  clustering(final_assembly.out.fasta)
 };
