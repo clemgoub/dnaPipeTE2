@@ -4,7 +4,6 @@ container_url = "lbmc/rasusa:${version}"
 
 params.coverage = ""
 params.genome_size = ""
-params.seed = ""
 params.sampling_out = ""
 
 process sampling {
@@ -16,10 +15,10 @@ process sampling {
   }
 
   input:
-    tuple val(file_id), path(fastq)
+    tuple val(group_id), val(file_id), path(fastq)
 
   output:
-    tuple val(file_id), path("sub_*.fastq.gz"), emit: fastq
+    tuple val(group_id), val(file_id), path("sub_*.fastq.gz"), emit: fastq
 
   script:
 
@@ -38,7 +37,6 @@ process sampling {
   if (fastq.size() == 2)
 """
 rasusa \
-  --seed ${params.seed} \
   --coverage ${params.coverage} \
   --genome-size ${params.genome_size} \
   -i ${fastq[0]} ${fastq[1]} \
@@ -47,7 +45,6 @@ rasusa \
   else
 """
 rasusa \
-  --seed ${params.seed} \
   --coverage ${params.coverage} \
   --genome-size ${params.genome_size} \
   -i ${fastq} \
