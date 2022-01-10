@@ -75,7 +75,7 @@ process merge {
     tuple val(file_id), path(folders)
 
   output:
-    tuple val(file_id), path("trinity_output"), emit: folder
+    tuple val(file_id), path("trinity_output_merge"), emit: folder
 
   script:
 
@@ -109,41 +109,41 @@ process merge {
     right_norm_fq.add(folder + "/insilico_read_normalization/right.norm.fq");
   }
 """
-  cp -RL ${folders[0]} trinity_output
+  cp -RL ${folders[0]} trinity_output_merge
 
   cat ${both_fas.join(" ")} \
     | awk '/^>/ { f = !(\$0 in a); a[\$0] } f==1 { print \$0 }' \
-    > trinity_output/both.fa
+    > trinity_output_merge/both.fa
   
-  grep ">" trinity_output/both.fa \
+  grep ">" trinity_output_merge/both.fa \
     | wc -l \
-    > trinity_output/both.fa.read_count
+    > trinity_output_merge/both.fa.read_count
 
   cat ${inchworm_ds_fa.join(" ")} \
     | awk 'BEGIN{seq_number=0};  !/^>/ {print \$0}; /^>/ { seq_number++; sub(">a[0-9]+;", ";", \$0); print ">a" seq_number \$0}' \
-    > trinity_output/inchworm.ds.fa
+    > trinity_output_merge/inchworm.ds.fa
     
   # yolo kmer count with awk
   cat ${jellyfish_kmers_25_asm_fa.join(" ")} \
     | bioawk -c fastx '{kmer[\$seq]+=\$name} END{for (k in kmer) {print ">" k; print kmer[k]}}' \
-    > trinity_output/jellyfish.kmers.25.asm.fa
+    > trinity_output_merge/jellyfish.kmers.25.asm.fa
 
   cat ${jellyfish_kmers_25_asm_fa_histo.join(" ")} \
     | awk 'BEGIN{kmer_count = 0}; {kmer_count += \$2}; END{print kmer_count}' \
-    > trinity_output/inchworm.kmer_count
+    > trinity_output_merge/inchworm.kmer_count
 
-  cat ${r1_norm_fq.join(" ")} > trinity_output/insilico_read_normalization/sub_${file_prefix}_R1.fastq.gz.normalized_K25_maxC200_minC1_maxCV10000.fq
-  cat ${r2_norm_fq.join(" ")} > trinity_output/insilico_read_normalization/sub_${file_prefix}_R2.fastq.gz.normalized_K25_maxC200_minC1_maxCV10000.fq
-  cat ${left_norm_fq.join(" ")} > trinity_output/insilico_read_normalization/left.norm.fq
-  cat ${right_norm_fq.join(" ")} > trinity_output/insilico_read_normalization/right.norm.fq
+  cat ${r1_norm_fq.join(" ")} > trinity_output_merge/insilico_read_normalization/sub_${file_prefix}_R1.fastq.gz.normalized_K25_maxC200_minC1_maxCV10000.fq
+  cat ${r2_norm_fq.join(" ")} > trinity_output_merge/insilico_read_normalization/sub_${file_prefix}_R2.fastq.gz.normalized_K25_maxC200_minC1_maxCV10000.fq
+  cat ${left_norm_fq.join(" ")} > trinity_output_merge/insilico_read_normalization/left.norm.fq
+  cat ${right_norm_fq.join(" ")} > trinity_output_merge/insilico_read_normalization/right.norm.fq
 
   cat ${jellyfish_kmers_25_asm_fa_histo.join(" ")} \
     | awk '{a[\$1] += \$2}; END{for (kmer in a){print kmer " " a[kmer]}}' \
-    > trinity_output/jellyfish.kmers.25.asm.fa.histo
+    > trinity_output_merge/jellyfish.kmers.25.asm.fa.histo
 """
 }
 
-process cluster {
+process final_assembly {
   container = "${container_url}"
   label "big_mem_multi_cpus"
   tag "$file_id"
@@ -156,7 +156,7 @@ process cluster {
     tuple val(folder_id), path(folder)
 
   output:
-    tuple val(file_id), path("${folder}"), emit: folder
+    tuple val(file_id), path("trinity_output/"), emit: folder
     tuple val(file_id), path("trinity_output.Trinity.fasta"), emit: fasta
     tuple val(file_id), path("trinity_output/salmon_outdir/quant.sf"), emit: quant
 
@@ -177,6 +177,7 @@ process cluster {
 
   if (fastq.size() == 2)
 """
+  cp -RL ${folder} trinity_output
   Trinity \
     --seqType fq \
     --max_memory ${memory}G \
@@ -185,10 +186,11 @@ process cluster {
     --CPU ${task.cpus} \
     --min_glue ${params.min_glue} \
     --min_contig_length ${params.min_contig_length} \
-    --output ${folder}
+    --output trinity_output
 """
   else
 """
+  cp -RL ${folder} trinity_output
   Trinity \
     --no_run_chrysalis \
     --seqType fq \
@@ -197,6 +199,6 @@ process cluster {
     --CPU ${task.cpus} \
     --min_glue ${params.min_glue} \
     --min_contig_length ${params.min_contig_length} \
-    --output ${folder}
+    --output trinity_output
 """
 }
