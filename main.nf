@@ -58,5 +58,5 @@ workflow {
   )
   assembly(sampling.out.fastq)
   merge(assembly.out.folder.groupTuple())
-  cluster(sampling.out.fastq.first(), merge.out.folder)
+  cluster(sra_dump.out.fastq, merge.out.folder)
 };
