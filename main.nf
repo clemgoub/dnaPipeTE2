@@ -3,6 +3,7 @@ nextflow.preview.recursion=true
 
 /* ========================= params =================================*/
 params.sra = "SRR14470610";
+params.fastq = "";
 params.coverage = 0.1;
 params.size = "170mb";
 params.min_glue = 1;
@@ -10,7 +11,11 @@ params.min_contig_length = 200;
 params.sample = 3;
 
 println "==========================================================================================="
-println "SRA number (--sra):                                " + params.sra;
+if (params.fastq == "") {
+  println "SRA number (--sra):                                " + params.sra;
+} else {
+  println "fastq file (--fastq):                              " + params.fastq;
+}
 println "genome size (--size):                              " + params.size;
 println "genome coverage (--coverage):                      " + params.coverage;
 println "sample number (--sample):                          " + params.sample;
@@ -41,10 +46,22 @@ include {
 );
 
 /* ========================= channel creation =================================*/
-channel.from( params.sra.split(" ") ).set{ sra };
+if (params.fastq == "") {
+  channel
+    .from( params.sra.split(" ") )
+    .set{ sra };
+  channel.empty()
+    .set{ fastq };
+} else {
+  channel.empty()
+    .set{ sra };
+  channel
+    .fromFilePairs( params.fastq )
+    .set{ fastq };
+}
 
 workflow {
   sra_dump(sra)
-  assembly(sra_dump.out.fastq)
+  assembly(sra_dump.out.fastq.mix(fastq))
   clustering(assembly.out.fasta)
 };
