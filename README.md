@@ -13,7 +13,7 @@ Then, you need to install `nextflow`.
 The following commands creates a file `nextflow` in the current dir.
 
 ```bash
-export NXF_EDGE=`
+export NXF_EDGE=1
 curl -s https://get.nextflow.io | bash
 ```
 
