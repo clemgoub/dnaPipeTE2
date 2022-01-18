@@ -9,6 +9,8 @@ params.size = "170mb";
 params.min_glue = 1;
 params.min_contig_length = 200;
 params.sample = 3;
+params.dfam_db = false
+params.custom_db = ""
 
 println "==========================================================================================="
 if (params.fastq == "") {
@@ -19,8 +21,11 @@ if (params.fastq == "") {
 println "genome size (--size):                              " + params.size;
 println "genome coverage (--coverage):                      " + params.coverage;
 println "sample number (--sample):                          " + params.sample;
+println "sample number (--sample):                          " + params.sample;
 println "trinity min glue (--min_glue):                     " + params.min_glue;
 println "trinity min contig length (--min_contig_length):   " + params.min_contig_length;
+println "use dfam database (--dfam_db):                     " + params.dfam_db;
+println "use custom database (--custom_db):                 " + (params.custom_db == "" ? "no" : params.custom_db)
 println "==========================================================================================="
 
 /* ========================= modules import =================================*/
@@ -45,23 +50,37 @@ include {
   min_contig_length: params.min_contig_length
 );
 
+include {
+  annotation
+} from './src/annotation.nf'
+
 /* ========================= channel creation =================================*/
 if (params.fastq == "") {
-  channel
-    .from( params.sra.split(" ") )
-    .set{ sra };
-  channel.empty()
-    .set{ fastq };
+  channel.from( params.sra.split(" ") ).set{ sra };
+  channel.empty().set{ fastq };
 } else {
-  channel.empty()
-    .set{ sra };
-  channel
-    .fromFilePairs( params.fastq )
-    .set{ fastq };
+  channel.empty().set{ sra };
+  channel.fromFilePairs( params.fastq ).set{ fastq };
+}
+
+if (params.dfam_db) {
+  channel.fromPath{ "https://www.dfam.org/releases/current/families/Dfam.h5.gz" };
+} else {
+  channel.empty().set{ dfam_db };
+}
+if (params.custom_db == "") {
+  channel.empty().set{ custom_db };
+} else {
+  channel.fromPath( params.custom_db ).set{ custom_db };
 }
 
 workflow {
   sra_dump(sra)
   assembly(sra_dump.out.fastq.mix(fastq))
   clustering(assembly.out.fasta)
+  annotation(
+    clustering.out.fasta,
+    dfam_db,
+    custom_db
+  )
 };

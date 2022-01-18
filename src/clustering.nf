@@ -16,7 +16,8 @@ process clustering {
     tuple val(file_id), path(fasta)
 
   output:
-    tuple val(file_id), val("Trin.Clustered.bak.clstr"), path("Trin.Clustered"), emit: cluster
+    tuple val(file_id), path("Trin.Clustered.clstr"), path("Trin.Clustered.bak.clstr"), emit: cluster
+    tuple val(file_id), path("Trin.Clustered"), emit: fasta 
 
   script:
 
