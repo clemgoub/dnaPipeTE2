@@ -23,6 +23,7 @@ workflow annotation {
       .mix(repeatmasker.out.annot)
       .mix(repeatmasker_extented.out.annot)
       .mix(repeatmasker_extented.out.annot)
+      .last()
       .set { rm_annot }
 
   emit:
