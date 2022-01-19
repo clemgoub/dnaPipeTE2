@@ -64,7 +64,7 @@ if (params.fastq == "") {
 }
 
 if (params.dfam_db) {
-  channel.fromPath{ "https://www.dfam.org/releases/current/families/Dfam.h5.gz" };
+  channel.fromPath( "https://www.dfam.org/releases/current/families/Dfam.h5.gz" ).map{it -> [it.simpleName, it]}.set{ dfam_db };
 } else {
   channel.empty().set{ dfam_db };
 }
