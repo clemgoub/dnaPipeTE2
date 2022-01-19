@@ -39,13 +39,13 @@ workflow enrichment {
   main:
     sampling_enriched(fastq, fastq_enriched)
     pre_assembly(sampling_enriched.out.fastq)
-    extract(
-      pre_assembly.out.fasta,
-      fastq
+    reads_enrichment(
+      fastq,
+      pre_assembly.out.read_names
     )
   emit:
   fastq = fastq
-  fastq_enriched = extract.out.fastq
+  fastq_enriched = reads_enrichment.out.fastq
 }
 
 process pre_assembly {
@@ -60,7 +60,7 @@ process pre_assembly {
     tuple val(file_id), path(fastq)
 
   output:
-    tuple val(file_id), path("trinity_output_${file_prefix}/inchworm.DS.fa"), emit: fasta
+    tuple val(file_id), path("trinity_output_${file_prefix}/chrysalis/readsToComponents.out.sort"), emit: read_names
 
   script:
 
@@ -81,7 +81,7 @@ process pre_assembly {
 """
   mkdir trinity_output_${file_prefix}
   Trinity \
-    --no_run_chrysalis \
+    --no_distributed_trinity_exec \
     --seqType fq \
     --max_memory ${memory}G \
     --left ${fastq[0]} \
@@ -95,7 +95,7 @@ process pre_assembly {
 """
   mkdir trinity_output_${file_prefix}
   Trinity \
-    --no_run_chrysalis \
+    --no_distributed_trinity_exec \
     --seqType fq \
     --max_memory ${memory}G \
     --single ${fastq} \
@@ -119,7 +119,7 @@ process reads_enrichment {
     tuple val(names_file_id), path(read_names)
 
   output:
-    tuple val(file_id), path("enriched_*"), emit: fastq
+    tuple val(file_id), path("selected_*"), emit: fastq
 
   script:
 
@@ -136,43 +136,32 @@ process reads_enrichment {
   };
   if (fastq.size() == 2)
 """
-# generate a list of read names
-awk '{print \$2}' ${read_names} \
-  | grep "/1" \
-  | sed 's|>||' \
-  | sed 's|/1||' \
-  > name.lst
+mkfifo ${fastq[0].simpleName}.pipe ${fastq[1].simpleName}.pipe
+awk '{ \
+  if(\$2 ~ /1\$/) { \
+    print "@"substr(\$2, 2)"\\n" \$4 "\\n+\\n" \$4 >> "${fastq[0].simpleName}.pipe" \
+  }; \
+  if(\$2 ~ /2\$/) { \
+    print "@"substr(\$2, 2)"\\n" \$4 "\\n+\\n" \$4 >> "${fastq[1].simpleName}.pipe" \
+  }; \
+}' ${read_names} &
 
-# we remove every thing after the first space in the read names
-zcat ${fastq[0]} \
-  | sed -E 's|@([^ ]*).*|@\\1|' \
-  | gzip -c \
-  | seqtk subseq - name.lst \
-  | gzip -c \
-  > enriched_${fastq[0]}
-
-zcat ${fastq[1]} \
-  | sed -E 's|@([^ ]*).*|@\\1|' \
-  | gzip -c \
-  | seqtk subseq - name.lst \
-  | gzip -c \
-  > enriched_${fastq[1]}
+gzip -c ${fastq[0].simpleName}.pipe \
+  > selected_${fastq[0].simpleName}.fastq.gz &
+gzip -c ${fastq[1].simpleName}.pipe \
+  > selected_${fastq[1].simpleName}.fastq.gz &
+wait
 """
   else
 """
-awk '{print \$2}' ${read_names} \
-  | grep "/1" \
-  | sed 's|>||' \
-  | sed 's|/1||' \
-  > name.lst
+mkfifo ${fastq.simpleName}.pipe
+awk '{ \
+    print "@"substr(\$2, 2)"\\n" \$4 "\\n+\\n" \$4 >> "${fastq.simpleName}.pipe" \
+}' ${read_names} &
 
-# we remove every thing after the first space in the read names
-zcat ${fastq} \
-  | sed -E 's|@([^ ]*).*|@\\1|' \
-  | gzip -c \
-  | seqtk subseq - name.lst \
-  | gzip -c \
-  > enriched_${fastq}
+gzip -c ${fastq.simpleName}.pipe \
+  > selected_${fastq.simpleName}.fastq.gz &
+wait
 """
 }
 

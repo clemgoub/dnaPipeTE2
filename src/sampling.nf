@@ -34,6 +34,8 @@ process sampling {
     break
   }
 
+  def corverage = params.coverage / 2.0;
+
   if (fastq.size() == 2)
 """
 rasusa \
@@ -45,7 +47,7 @@ rasusa \
   else
 """
 rasusa \
-  --coverage ${params.coverage} \
+  --coverage ${coverage} \
   --genome-size ${params.genome_size} \
   -i ${fastq} \
   -o sub_${fastq.simpleName}.fastq.gz
