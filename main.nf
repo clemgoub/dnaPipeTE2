@@ -27,7 +27,7 @@ println "trinity min glue (--min_glue):                         " + params.min_g
 println "trinity min contig length (--min_contig_length):       " + params.min_contig_length;
 println "use dfam database (--dfam_db):                         " + params.dfam_db;
 println "use custom database (--custom_db):                     " + (params.custom_db == "" ? "no" : params.custom_db)
-println "use repeatmakser threshold (--repeatmakser threshold): " + params.repeatmakser_threshold;
+println "use repeatmakser threshold (--repeatmakser threshold): " + params.repeatmasker_threshold;
 println "==========================================================================================="
 
 /* ========================= modules import =================================*/
