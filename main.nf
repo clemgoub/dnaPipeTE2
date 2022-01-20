@@ -11,21 +11,23 @@ params.min_contig_length = 200;
 params.sample = 3;
 params.dfam_db = false
 params.custom_db = ""
+params.repeatmasker_threshold = 0.0
 
 println "==========================================================================================="
 if (params.fastq == "") {
-  println "SRA number (--sra):                                " + params.sra;
+  println "SRA number (--sra):                                    " + params.sra;
 } else {
-  println "fastq file (--fastq):                              " + params.fastq;
+  println "fastq file (--fastq):                                  " + params.fastq;
 }
-println "genome size (--size):                              " + params.size;
-println "genome coverage (--coverage):                      " + params.coverage;
-println "sample number (--sample):                          " + params.sample;
-println "sample number (--sample):                          " + params.sample;
-println "trinity min glue (--min_glue):                     " + params.min_glue;
-println "trinity min contig length (--min_contig_length):   " + params.min_contig_length;
-println "use dfam database (--dfam_db):                     " + params.dfam_db;
-println "use custom database (--custom_db):                 " + (params.custom_db == "" ? "no" : params.custom_db)
+println "genome size (--size):                                  " + params.size;
+println "genome coverage (--coverage):                          " + params.coverage;
+println "sample number (--sample):                              " + params.sample;
+println "sample number (--sample):                              " + params.sample;
+println "trinity min glue (--min_glue):                         " + params.min_glue;
+println "trinity min contig length (--min_contig_length):       " + params.min_contig_length;
+println "use dfam database (--dfam_db):                         " + params.dfam_db;
+println "use custom database (--custom_db):                     " + (params.custom_db == "" ? "no" : params.custom_db)
+println "use repeatmakser threshold (--repeatmakser threshold): " + params.repeatmakser_threshold;
 println "==========================================================================================="
 
 /* ========================= modules import =================================*/
@@ -52,7 +54,10 @@ include {
 
 include {
   annotation
-} from './src/annotation.nf'
+} from './src/annotation.nf' addParams(
+  repeatmasker_threshold: params.repeatmasker_threshold,
+);
+
 
 /* ========================= channel creation =================================*/
 if (params.fastq == "") {
