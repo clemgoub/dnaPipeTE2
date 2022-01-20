@@ -95,14 +95,13 @@ process repeatmasker_extented {
       file_prefix = file_id
     break
   }
-  def unzip_db = "";
+  def unzip_db = "mv ${db} libraries/RepeatMaskerLib.h5";
   if (db =~ /^.*\.gz$/) {
-    unzip_db = "gunzip -c ${db} > libraries/db_unzip.h5";
+    unzip_db = "gunzip -c ${db} > libraries/RepeatMaskerLib.h5";
   }
 """
 mkdir libraries
 ${unzip_db}
-mv ${db} libraries/
 RepeatMasker \
   -pa ${task.cpus} \
    -s -no_is -e hmmer -libdir libraries/ \
