@@ -22,7 +22,6 @@ if (params.fastq == "") {
 println "genome size (--size):                                  " + params.size;
 println "genome coverage (--coverage):                          " + params.coverage;
 println "sample number (--sample):                              " + params.sample;
-println "sample number (--sample):                              " + params.sample;
 println "trinity min glue (--min_glue):                         " + params.min_glue;
 println "trinity min contig length (--min_contig_length):       " + params.min_contig_length;
 println "use dfam database (--dfam_db):                         " + params.dfam_db;
