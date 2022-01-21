@@ -2,6 +2,8 @@ version = "1.4"
 container_url = "dfam/tetools:${version}"
 
 params.annotation = ""
+params.dfam_db = false
+params.custom_db = ""
 params.repeatmasker_threshold = 0.0
 params.annotation_out = ""
 
@@ -11,18 +13,30 @@ workflow annotation {
     dfam_db
     custom_db
   main:
-    repeatmasker(fasta)
-    repeatmasker_extented(
-      fasta,
-      dfam_db.collect()
+    if (params.custom_db != "") {
+      repeatmasker_custom(
+        fasta,
+        custom_db.collect()
+      )
+      repeatmasker_custom.out.annotation
+        .set{ annotation }
+    } else {
+      if (params.dfam_db) {
+        repeatmasker_extented(
+          fasta,
+          dfam_db.collect()
+        )
+        repeatmasker_extented.out.annotation
+          .set{ annotation }
+      } else {
+        repeatmasker(fasta)
+        repeatmasker.out.annotation
+          .set{ annotation }
+      }
+    }
+    parse_repeatmasker(
+      annotation
     )
-    repeatmasker_custom(
-      fasta,
-      custom_db.collect()
-    )
-  parse_repeatmasker(
-    repeatmasker.out.annotation
-  )
 
   emit:
     rm_annot = parse_repeatmasker.out.annotation

@@ -54,6 +54,8 @@ include {
 include {
   annotation
 } from './src/annotation.nf' addParams(
+  dfam_db: params.dfam_db,
+  custom_db: params.custom_db,
   repeatmasker_threshold: params.repeatmasker_threshold,
 );
 
