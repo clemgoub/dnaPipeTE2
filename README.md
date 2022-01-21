@@ -15,6 +15,7 @@ The following commands creates a file `nextflow` in the current dir.
 ```bash
 export NXF_EDGE=1
 curl -s https://get.nextflow.io | bash
+./nextflow self-update
 ```
 
 Then you can run the pipeline with the following command:
