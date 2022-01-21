@@ -59,6 +59,9 @@ include {
   repeatmasker_threshold: params.repeatmasker_threshold,
 );
 
+include {
+  quantification
+} from './src/quantification.nf'
 
 /* ========================= channel creation =================================*/
 if (params.fastq == "") {
@@ -89,4 +92,5 @@ workflow {
     dfam_db,
     custom_db
   )
+  quantification(assembly.out.super_transcript, fastq)
 };

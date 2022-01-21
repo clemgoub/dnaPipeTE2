@@ -27,9 +27,11 @@ workflow assembly {
     sampling(fastq.first())
     enrichment.recurse(fastq.first(), sampling.out.fastq).times(params.sample)
     complete_assembly(enrichment.out.fastq_enriched.last())
+    super_transcript(complete_assembly.out.fasta)
 
   emit:
     fasta = complete_assembly.out.fasta
+    super_transcript = super_transcript.out.fasta
 }
 
 workflow enrichment {
@@ -221,5 +223,42 @@ process complete_assembly {
     --min_glue ${params.min_glue} \
     --min_contig_length ${params.min_contig_length} \
     --output trinity_output_${file_prefix}
+"""
+}
+
+
+process super_transcript {
+  container = "${container_url}"
+  label "big_mem_mono_cpus"
+  tag "$file_id"
+  if (params.assembly_out != "") {
+    publishDir "results/${params.assembly_out}", mode: 'copy'
+  }
+
+  input:
+    tuple val(file_id), path(fasta)
+
+  output:
+    tuple val(file_id), path("*.fasta"), emit: fasta
+    tuple val(file_id), path("*.gtf"), emit: gtf
+
+  script:
+
+  switch(file_id) {
+    case {it instanceof List}:
+      file_prefix = file_id[0]
+    break;
+    case {it instanceof Map}:
+      file_prefix = file_id.values()[0]
+    break;
+    default:
+      file_prefix = file_id
+    break;
+  };
+  def memory = "${task.memory}" - ~/\s*GB/
+
+"""
+Trinity_gene_splice_modeler.py \
+  --trinity_fasta ${fasta}
 """
 }
