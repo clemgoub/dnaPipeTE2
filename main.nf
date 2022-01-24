@@ -64,7 +64,7 @@ include {
 } from './src/quantification.nf'
 
 include {
-  analysis 
+  analysis
 } from './src/analysis.nf'
 
 /* ========================= channel creation =================================*/
@@ -102,6 +102,5 @@ workflow {
     annotation.out.annotation,
     clustering.out.cluster,
     assembly.out.super_transcript,
-    assembly.out.super_transcript_gtf
   )
-}
+};

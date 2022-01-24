@@ -39,7 +39,7 @@ workflow annotation {
     )
 
   emit:
-    rm_annot = parse_repeatmasker.out.annotation
+    annotation = parse_repeatmasker.out.annotation
 }
 
 process repeatmasker {

@@ -14,9 +14,8 @@ process analysis {
     tuple val(tsv_id), path(tsv)
     tuple val(annotation_id), path(annotation)
     tuple val(cluster_id), path(cluster), path(bak_clstr)
-    tuple val(transcript_id), path(fasta)
-    tuple val(gtf_id), path(gtf)
-
+    tuple val(transcript_id), path(fasta), path(gtf)
+    
   output:
     tuple val(file_id), path("*_report.txt"), emit: report
 

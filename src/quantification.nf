@@ -13,7 +13,7 @@ workflow quantification {
     )
   emit:
     counts = mapping_fastq.out.counts
-
+    tsv = mapping_fastq.out.tsv
 }
 
 params.index_fasta = "-k 31 --make-unique"
@@ -27,7 +27,7 @@ process index_fasta {
   }
 
   input:
-    tuple val(file_id), path(fasta)
+    tuple val(file_id), path(fasta), path(gtf)
 
   output:
     tuple val(file_id), path("*.index*"), emit: index
@@ -56,7 +56,7 @@ process mapping_fastq {
 
   output:
   tuple val(file_id), path("${file_prefix}"), emit: counts
-  tuple val(file_id), path("${file_prefix}/*.tsv"), emit: tsv 
+  tuple val(file_id), path("${file_prefix}/*.tsv"), emit: tsv
   tuple val(file_id), path("*_report.txt"), emit: report
 
   script:
