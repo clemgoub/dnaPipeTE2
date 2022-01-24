@@ -56,6 +56,7 @@ process mapping_fastq {
 
   output:
   tuple val(file_id), path("${file_prefix}"), emit: counts
+  tuple val(file_id), path("${file_prefix}/*.tsv"), emit: tsv 
   tuple val(file_id), path("*_report.txt"), emit: report
 
   script:

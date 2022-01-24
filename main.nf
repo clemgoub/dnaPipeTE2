@@ -63,6 +63,10 @@ include {
   quantification
 } from './src/quantification.nf'
 
+include {
+  analysis 
+} from './src/analysis.nf'
+
 /* ========================= channel creation =================================*/
 if (params.fastq == "") {
   channel.from( params.sra.split(" ") ).set{ sra };
@@ -93,4 +97,11 @@ workflow {
     custom_db
   )
   quantification(assembly.out.super_transcript, fastq)
-};
+  analysis(
+    quantification.out.tsv,
+    annotation.out.annotation,
+    clustering.out.cluster,
+    assembly.out.super_transcript,
+    assembly.out.super_transcript_gtf
+  )
+}

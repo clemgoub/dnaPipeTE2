@@ -32,6 +32,7 @@ workflow assembly {
   emit:
     fasta = complete_assembly.out.fasta
     super_transcript = super_transcript.out.fasta
+    super_transcript_gtf = super_transcript.out.gtf
 }
 
 workflow enrichment {
