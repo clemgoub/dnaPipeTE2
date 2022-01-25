@@ -40,7 +40,7 @@ kallisto index ${params.index_fasta} -i ${fasta.baseName}.index ${fasta} \
 """
 }
 
-params.mapping_fastq = "--bias --bootstrap-samples 100"
+params.mapping_fastq = "--bias"
 params.mapping_fastq_out = ""
 process mapping_fastq {
   container = "${container_url}"
@@ -73,7 +73,7 @@ process mapping_fastq {
   ${params.mapping_fastq} -o ${file_prefix} \
   ${reads[0]} ${reads[1]} &> ${file_prefix}_kallisto_mapping_report.txt
   grep "n_processed" ${file_prefix}/run_info.json \
-    | sed 's/.*"n_processed":/read_processed\t0\t/' \
+    | sed 's/.*"n_processed":/read_processed\t0\t0\t/' \
     | sed 's/,/\t0/' \
     >> ${file_prefix}/abundance.tsv
   """
@@ -84,7 +84,7 @@ process mapping_fastq {
   ${params.mapping_fastq} -o ${file_prefix} \
   ${reads[0]} &> ${file_prefix}_kallisto_mapping_report.txt
   grep "n_processed" ${file_prefix}/run_info.json \
-    | sed 's/.*"n_processed":/read_processed\t0\t/' \
+    | sed 's/.*"n_processed":/read_processed\t0\t0\t/' \
     | sed 's/,/\t0/' \
     >> ${file_prefix}/abundance.tsv
   """
