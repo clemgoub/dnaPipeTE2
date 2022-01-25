@@ -72,6 +72,10 @@ process mapping_fastq {
   kallisto quant -i ${index} -t ${task.cpus} \
   ${params.mapping_fastq} -o ${file_prefix} \
   ${reads[0]} ${reads[1]} &> ${file_prefix}_kallisto_mapping_report.txt
+  grep "n_processed" ${file_prefix}/run_info.json \
+    | sed 's/.*"n_processed":/read_processed\t0\t/' \
+    | sed 's/,/\t0/' \
+    >> ${file_prefix}/abundance.tsv
   """
   else
   """
@@ -79,5 +83,9 @@ process mapping_fastq {
   kallisto quant -i ${index} -t ${task.cpus} --single \
   ${params.mapping_fastq} -o ${file_prefix} \
   ${reads[0]} &> ${file_prefix}_kallisto_mapping_report.txt
+  grep "n_processed" ${file_prefix}/run_info.json \
+    | sed 's/.*"n_processed":/read_processed\t0\t/' \
+    | sed 's/,/\t0/' \
+    >> ${file_prefix}/abundance.tsv
   """
 }
