@@ -76,7 +76,7 @@ RepeatMasker \
   -pa ${task.cpus} \
   -s \
   -no_is \
-  -e hmmer \
+  -lib /opt/RepeatMasker/Libraries/RepeatMasker.lib \
   ${fasta}
 """
 }

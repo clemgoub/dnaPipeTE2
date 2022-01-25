@@ -42,7 +42,7 @@ rasusa \
   --coverage ${params.coverage} \
   --genome-size ${params.genome_size} \
   -i ${fastq[0]} ${fastq[1]} \
-  -o sub_${fastq[0].simpleName}.fastq.gz sub_${fastq[1].simpleName}.fastq.gz
+  -o sub_${fastq[0].simpleName}_R1.fastq.gz sub_${fastq[1].simpleName}_R2.fastq.gz
 """
   else
 """
@@ -85,19 +85,19 @@ process sampling_enriched {
 
   if (fastq.size() == 2)
 """
-mkfifo ${fastq[0].simpleName}.pipe ${fastq[1].simpleName}.pipe
+mkfifo ${fastq[0].simpleName}_R1.pipe ${fastq[1].simpleName}_R2.pipe
 rasusa \
   --coverage ${params.coverage} \
   --genome-size ${params.genome_size} \
   -i ${fastq[0]} ${fastq[1]} \
   -O g \
-  -o ${fastq[0].simpleName}.pipe ${fastq[1].simpleName}.pipe &
-cat ${fastq[0].simpleName}.pipe \
+  -o ${fastq[0].simpleName}_R1.pipe ${fastq[1].simpleName}_R2.pipe &
+cat ${fastq[0].simpleName}_R1.pipe \
   ${fastq_enriched[0]} \
-  > enriched_sub_${fastq[0].simpleName}.fastq.gz &
-cat ${fastq[1].simpleName}.pipe \
+  > enriched_sub_${fastq[0].simpleName}_R1.fastq.gz &
+cat ${fastq[1].simpleName}_R1.pipe \
   ${fastq_enriched[1]} \
-  > enriched_sub_${fastq[1].simpleName}.fastq.gz &
+  > enriched_sub_${fastq[1].simpleName}_R2.fastq.gz &
 wait
 """
   else

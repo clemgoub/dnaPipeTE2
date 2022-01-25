@@ -138,20 +138,20 @@ process reads_enrichment {
   };
   if (fastq.size() == 2)
 """
-mkfifo ${fastq[0].simpleName}.pipe ${fastq[1].simpleName}.pipe
+mkfifo ${fastq[0].simpleName}_R1.pipe ${fastq[1].simpleName}_R2.pipe
 awk '{ \
   if(\$2 ~ /1\$/) { \
-    print "@"substr(\$2, 2)"\\n" \$4 "\\n+\\n" \$4 >> "${fastq[0].simpleName}.pipe" \
+    print "@"substr(\$2, 2)"\\n" \$4 "\\n+\\n" \$4 >> "${fastq[0].simpleName}_R1.pipe" \
   }; \
   if(\$2 ~ /2\$/) { \
-    print "@"substr(\$2, 2)"\\n" \$4 "\\n+\\n" \$4 >> "${fastq[1].simpleName}.pipe" \
+    print "@"substr(\$2, 2)"\\n" \$4 "\\n+\\n" \$4 >> "${fastq[1].simpleName}_R2.pipe" \
   }; \
 }' ${read_names} &
 
-gzip -c ${fastq[0].simpleName}.pipe \
-  > selected_${fastq[0].simpleName}.fastq.gz &
-gzip -c ${fastq[1].simpleName}.pipe \
-  > selected_${fastq[1].simpleName}.fastq.gz &
+gzip -c ${fastq[0].simpleName}_R1.pipe \
+  > selected_${fastq[0].simpleName}_R1.fastq.gz &
+gzip -c ${fastq[1].simpleName}_R2.pipe \
+  > selected_${fastq[1].simpleName}_R2.fastq.gz &
 wait
 """
   else
