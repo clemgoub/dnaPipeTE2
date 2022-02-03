@@ -182,7 +182,7 @@ seqtk subseq ${fasta} ${cluster_sequence_name} \
 }
 
 process align_cluster {
-  container = "lbmc/clustalo:1.2.4"
+  container = "quay.io/biocontainers/mafft:7.490--h779adbc_0"
   label "big_mem_multi_cpus"
   tag "$file_id"
   if (params.clustering_out != "") {
@@ -210,11 +210,11 @@ process align_cluster {
   }
 
 """
-clustalo --threads=${task.cpus} \
-  --in ${fasta} \
-  --auto \
-  --use-kimura \
-  --out ${fasta.simpleName}_cons.align
+mafft --thread ${task.cpus} \
+  --quiet \
+  --clustalout \
+  ${fasta} \
+  > ${fasta.simpleName}_cons.align
 """
 }
 
