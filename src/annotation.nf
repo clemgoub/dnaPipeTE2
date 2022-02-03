@@ -195,7 +195,7 @@ process parse_repeatmasker {
 
 """
 #! /usr/local/bin/python
-with open("Trin.Clustered.out", 'r') as trinity_handle:
+with open("concensus_${file_id}.fasta.out", 'r') as trinity_handle:
     line_number = 0
     trinity_out = list()
     for line in trinity_handle:
